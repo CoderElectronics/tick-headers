@@ -5,26 +5,47 @@
 
 #ifdef MIRROR_APP
 
-static inline void mixel_draw_pixel(int16_t x, int16_t y, uint16_t color) {
-    static mixel_pixel_cmd_t cmd;
-    cmd.x = x;
-    cmd.y = y;
-    cmd.color = color;
-    syscall((uint32_t)SYS_DRAW_PIXEL, (uint32_t)&cmd, 0);
+/*
+ * App side FFI
+ *
+ * these will be compiled into the app binary and used to transfer data to the host via syscalls
+ */
+
+static inline void mirror_putc(char c) {
+    syscall((uint32_t)SYS_PUTC, (uint32_t)c, 0);
 }
 
-static inline void mixel_draw_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color) {
-    static mixel_line_cmd_t cmd;
-    cmd.x0 = x0;
-    cmd.y0 = y0;
-    cmd.x1 = x1;
-    cmd.y1 = y1;
-    cmd.color = color;
-    syscall((uint32_t)SYS_DRAW_LINE, (uint32_t)&cmd, 0);
+static inline void mirror_println(const char *str) {
+    syscall((uint32_t)SYS_PRINTLN, (uint32_t)str, 0);
 }
 
 #endif
 
 #ifdef MIRROR_HOST
+
+/*
+ * Host side FFI
+ *
+ * these will be compiled into the host binary and used to transfer data from the app via syscalls
+ */
+
+#include "mirror_bindings.h"
+#include "tick_engine/tick_engine.h"
+#include "tick_engine/uvm32/uvm32.h"
+#include <zephyr/kernel.h>
+
+static void handle_putc(uvm32_state_t *vmst, uvm32_evt_t *evt) {
+    char c = (char)uvm32_arg_getval(vmst, evt, ARG0);
+
+    printk("%c", c);
+}
+REGISTER_FFI(SYS_PUTC, handle_putc);
+
+static void handle_println(uvm32_state_t *vmst, uvm32_evt_t *evt) {
+    const char *str = uvm32_arg_getcstr(vmst, evt, ARG0);
+
+    printk("%s\n", str);
+}
+REGISTER_FFI(SYS_PRINTLN, handle_println);
 
 #endif

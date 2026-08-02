@@ -36,6 +36,10 @@ typedef enum {
 
     SYS_MSLEEP,
 
+    SYS_LCD_UPDATE,
+    SYS_LCD_CLEAR,
+    SYS_LCD_SET_PIXEL,
+
     SYS_MAX_FUNCTIONS
 } mirror_syscall_id_t;
 
@@ -93,3 +97,7 @@ typedef struct {
 typedef struct {
     uint32_t font_ptr;
 } ffi_lcd_get_font_cmd_t;
+
+typedef struct {
+    int x, y, color;
+} ffi_lcd_set_pixel_cmd_t;

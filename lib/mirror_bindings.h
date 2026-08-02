@@ -141,6 +141,20 @@ static inline void mirror_msleep(int32_t ms) {
     syscall((uint32_t)SYS_MSLEEP, (uint32_t)ms, 0);
 }
 
+static inline void mirror_lcd_update(void) {
+    syscall((uint32_t)SYS_LCD_UPDATE, 0, 0);
+}
+
+static inline void mirror_lcd_clear(int color) {
+    syscall((uint32_t)SYS_LCD_CLEAR, (uint32_t)color, 0);
+}
+
+static inline void mirror_lcd_set_pixel(int x, int y, int color) {
+    static ffi_lcd_set_pixel_cmd_t cmd;
+    cmd.x = x; cmd.y = y; cmd.color = color;
+    syscall((uint32_t)SYS_LCD_SET_PIXEL, (uint32_t)&cmd, 0);
+}
+
 #endif
 
 #ifdef MIRROR_HOST
@@ -156,6 +170,7 @@ static inline void mirror_msleep(int32_t ms) {
 #include "tick_engine/uvm32/uvm32.h"
 #include <zephyr/kernel.h>
 
+#include "lcd/lcd_hal.h"
 #include "lcd/lcd_prim.h"
 #include "lcd/fonts/Org_01.h"
 #include "lcd/fonts/Mirror_Icons12.h"
@@ -343,5 +358,25 @@ static void handle_msleep(uvm32_state_t *vmst, uvm32_evt_t *evt) {
     k_msleep(ms);
 }
 REGISTER_FFI(SYS_MSLEEP, handle_msleep);
+
+static void handle_lcd_update(uvm32_state_t *vmst, uvm32_evt_t *evt) {
+    lcd_update();
+}
+REGISTER_FFI(SYS_LCD_UPDATE, handle_lcd_update);
+
+static void handle_lcd_clear(uvm32_state_t *vmst, uvm32_evt_t *evt) {
+    int color = (int)uvm32_arg_getval(vmst, evt, ARG0);
+    lcd_clear(color);
+}
+REGISTER_FFI(SYS_LCD_CLEAR, handle_lcd_clear);
+
+static void handle_lcd_set_pixel(uvm32_state_t *vmst, uvm32_evt_t *evt) {
+    uvm32_slice_t slice = uvm32_arg_getslice_fixed(vmst, evt, ARG0, sizeof(ffi_lcd_set_pixel_cmd_t));
+    if (!slice.ptr) return;
+
+    ffi_lcd_set_pixel_cmd_t *cmd = (ffi_lcd_set_pixel_cmd_t *)slice.ptr;
+    lcd_set_pixel(cmd->x, cmd->y, cmd->color);
+}
+REGISTER_FFI(SYS_LCD_SET_PIXEL, handle_lcd_set_pixel);
 
 #endif

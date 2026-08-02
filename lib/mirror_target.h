@@ -1,3 +1,7 @@
+/*
+ * Basic VM-side ONLY definitions for Tick Engine
+ */
+
 #pragma once
 
 #ifdef MIRROR_APP

@@ -1,3 +1,7 @@
+/*
+ * stdint shim for Tick Engine VM side
+ */
+
 #pragma once
 
 #ifdef MIRROR_APP

@@ -1,3 +1,7 @@
+/*
+ * Split FFI bindings for Tick Engine host and VM side. These are in the same file for easy reference.
+ */
+
 #pragma once
 
 #include "mirror_target.h"

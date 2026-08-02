@@ -1,3 +1,7 @@
+/*
+ * All shared definitions for Tick Engine on both host and VM side
+ */
+
 #pragma once
 
 #ifdef MIRROR_APP

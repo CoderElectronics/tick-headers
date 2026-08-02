@@ -31,14 +31,14 @@ typedef enum {
     SYS_LCD_DRAW_FONT_LC,
     SYS_LCD_GET_FONT_BOUNDS,
     SYS_LCD_GET_FONT_BOUNDS_LC,
+    SYS_LCD_DRAW_BITMAP,
     SYS_LCD_GET_FONT_MIRROR_ICONS12,
     SYS_LCD_GET_FONT_ORG_01,
-
-    SYS_MSLEEP,
-
     SYS_LCD_UPDATE,
     SYS_LCD_CLEAR,
     SYS_LCD_SET_PIXEL,
+
+    SYS_MSLEEP,
 
     SYS_MAX_FUNCTIONS
 } mirror_syscall_id_t;
@@ -101,3 +101,8 @@ typedef struct {
 typedef struct {
     int x, y, color;
 } ffi_lcd_set_pixel_cmd_t;
+
+typedef struct {
+    int x, y, color;
+    uint8_t w, h;
+} ffi_lcd_bitmap_cmd_t;

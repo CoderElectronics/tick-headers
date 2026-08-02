@@ -125,6 +125,16 @@ static inline void lcd_get_font_bounds_lc(const char *str, const void *font, int
     *x1 = cmd.x1; *y1 = cmd.y1; *w = cmd.w; *h = cmd.h;
 }
 
+static inline void lcd_draw_bitmap(int x, int y, const uint8_t *bitmap, uint8_t w, uint8_t h, int color) {
+    static ffi_lcd_bitmap_cmd_t cmd;
+    cmd.x = x;
+    cmd.y = y;
+    cmd.w = w;
+    cmd.h = h;
+    cmd.color = color;
+    syscall((uint32_t)SYS_LCD_DRAW_BITMAP, (uint32_t)&cmd, (uint32_t)bitmap);
+}
+
 static inline const void* lcd_get_font_mirror_icons12(void) {
     static ffi_lcd_get_font_cmd_t cmd;
     syscall((uint32_t)SYS_LCD_GET_FONT_MIRROR_ICONS12, (uint32_t)&cmd, 0);
@@ -332,6 +342,21 @@ static void handle_lcd_get_font_bounds_lc(uvm32_state_t *vmst, uvm32_evt_t *evt)
                            &cmd->x1, &cmd->y1, &cmd->w, &cmd->h);
 }
 REGISTER_FFI(SYS_LCD_GET_FONT_BOUNDS_LC, handle_lcd_get_font_bounds_lc);
+
+static void handle_lcd_draw_bitmap(uvm32_state_t *vmst, uvm32_evt_t *evt) {
+    uvm32_slice_t cmd_slice = uvm32_arg_getslice_fixed(vmst, evt, ARG0, sizeof(ffi_lcd_bitmap_cmd_t));
+    if (!cmd_slice.ptr) return;
+
+    ffi_lcd_bitmap_cmd_t *cmd = (ffi_lcd_bitmap_cmd_t *)cmd_slice.ptr;
+
+    uint32_t expected_bytes = (cmd->w * cmd->h + 7) / 8;
+
+    uvm32_slice_t bmp_slice = uvm32_arg_getslice_fixed(vmst, evt, ARG1, expected_bytes);
+    if (!bmp_slice.ptr) return;
+
+    lcd_draw_bitmap(cmd->x, cmd->y, (const uint8_t *)bmp_slice.ptr, cmd->w, cmd->h, cmd->color);
+}
+REGISTER_FFI(SYS_LCD_DRAW_BITMAP, handle_lcd_draw_bitmap);
 
 static void handle_lcd_get_font_mirror_icons12(uvm32_state_t *vmst, uvm32_evt_t *evt) {
     uvm32_slice_t slice = uvm32_arg_getslice_fixed(vmst, evt, ARG0, sizeof(ffi_lcd_get_font_cmd_t));

@@ -40,6 +40,18 @@ typedef enum {
 
     SYS_MSLEEP,
 
+    // system services
+    SYS_EXT_RTC_GET_TIME,
+    SYS_SETTINGS_TIME_IS_24H,
+    SYS_PMIC_GET_CHARGE_STATUS,
+    SYS_PMIC_GET_BATTERY_STATUS,
+    SYS_SENSING_BARO_MEASURE,
+    SYS_MOTION_TRACKER_GET_STEPS,
+    SYS_MOTION_TRACKER_STEPS_ENABLED,
+    SYS_MOTION_TRACKER_SLEEP_ENABLED,
+    SYS_MOTION_TRACKER_GET_SLEEP_STATS,
+    SYS_HAPTICS_PLAY,
+
     SYS_MAX_FUNCTIONS
 } mirror_syscall_id_t;
 
@@ -106,3 +118,28 @@ typedef struct {
     int x, y, color;
     uint8_t w, h;
 } ffi_lcd_bitmap_cmd_t;
+
+typedef struct {
+    int tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday;
+} ffi_rtc_get_time_cmd_t;
+
+typedef struct {
+    int charging, error, vbus_present;
+} ffi_pmic_charge_status_cmd_t;
+
+typedef struct {
+    int voltage_mv, percent, rate_mpct_per_hr;
+} ffi_pmic_battery_status_cmd_t;
+
+typedef struct {
+    int pressure_pa, temperature_c, altitude_m;
+} ffi_baro_sample_cmd_t;
+
+typedef struct {
+    uint32_t sleep_start_utc, uncertain_start_utc;
+    int sleep_len_m, deep_len_m;
+} ffi_sleep_stats_cmd_t;
+
+typedef struct {
+    uint8_t seq_regs[8];
+} ffi_haptics_play_cmd_t;
